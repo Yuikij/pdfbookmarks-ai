@@ -94,15 +94,18 @@ test('real stdio client renders a scan, plans Chinese outline and verifies a lin
     ['第一章 简介', 4, 1], ['研究方法', 5, 2]
   ]);
   assert.equal(output.structuredContent.nextOutlineOffset, 2);
+  assert.deepEqual(output.structuredContent.pageLabels.map(({ label }) => label), ['TOC 1', 'i', 'ii', '1', '2', '3']);
   const repeat = await call('pdf_write_bookmarks', editArgs);
   assert.equal(repeat.structuredContent.error.code, 'OUTPUT_EXISTS');
   assert.equal(sha(await readFile(path.join(root, 'source.pdf'))), sha(source));
 
-  const keep = { ...input, path: 'output.pdf', outlineMode: 'keep', entries: [{ title: 'New TOC', depth: 1, page: 4 }], insertToc: {} };
+  const keep = { ...input, path: 'output.pdf', outlineMode: 'keep', entries: [{ title: 'New TOC', depth: 1, page: 4 }], insertToc: { beforePage: 5 } };
   const keepPlan = (await call('pdf_plan_bookmarks', keep)).structuredContent;
   const kept = await call('pdf_write_bookmarks', { ...keep, outputPath: 'keep.pdf', planId: keepPlan.planId, sourceSha256: keepPlan.sourceSha256 });
   assert.equal(kept.structuredContent.verified, true, JSON.stringify(kept.content));
   assert.equal(kept.structuredContent.bookmarkCount, 3);
+  const inspectedKeep = await call('pdf_inspect', { path: 'keep.pdf' });
+  assert.deepEqual(inspectedKeep.structuredContent.pageLabels.map(({ label }) => label), ['TOC 1', 'i', 'ii', '1', 'TOC 2.1', '2', '3']);
 
   const blocked = await call('pdf_inspect', { path: outside });
   assert.equal(blocked.structuredContent.error.code, 'PATH_OUTSIDE_ROOT');

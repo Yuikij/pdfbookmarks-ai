@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pdfbookmarks-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local PDF bookmarks and clickable tables of contents for AI agents."
 readme = "README.md"
 requires-python = ">=3.9"

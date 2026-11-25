@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "pdfbookmarks",
   "display_name": "PDFBookmarks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Add verified bookmarks and clickable tables of contents to local PDFs.",
   "author": { "name": "PDFBookmarks", "url": "https://pdfbookmarks.com" },
   "homepage": "https://pdfbookmarks.com/ai-tools",

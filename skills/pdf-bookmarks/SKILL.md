@@ -4,7 +4,7 @@ description: Inspect or add nested bookmarks, PDF outlines, and printable clicka
 license: MIT
 metadata:
   author: PDFBookmarks
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # PDF Bookmarks

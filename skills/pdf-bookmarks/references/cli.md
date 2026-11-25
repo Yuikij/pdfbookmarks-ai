@@ -3,7 +3,7 @@
 Requires Node.js 22.13+. Obtain the pinned npm archive from the [GitHub release](https://github.com/Yuikij/pdfbookmarks-ai/releases/latest), or use an installed `pdfbookmarks-mcp` command. Invoke the release directly using this example, substituting your root directory.
 
 ```sh
-npx --yes 'https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks-mcp-0.1.0.tgz' \
+npx --yes 'https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.1/pdfbookmarks-mcp-0.1.1.tgz' \
   call pdf_inspect --root '/path/to/pdfs' --json '{"path":"book.pdf"}'
 ```
 

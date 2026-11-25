@@ -39,7 +39,7 @@ Requires Node.js 22.13+. Install the published GitHub Release archive with npm o
       "command": "npx",
       "args": [
         "--yes",
-        "https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks-mcp-0.1.0.tgz",
+        "https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.1/pdfbookmarks-mcp-0.1.1.tgz",
         "serve",
         "--root",
         "/absolute/path/to/pdfs"
@@ -53,12 +53,12 @@ Replace the folder with one you want to share with the MCP. Repeat `--root` to g
 
 ### Desktop bundle and Python
 
-Download the [desktop MCPB](https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks-0.1.0.mcpb) for compatible macOS or Windows clients. Open the downloaded file in your client and select your PDF folder during setup.
+Download the [desktop MCPB](https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.1/pdfbookmarks-0.1.1.mcpb) for compatible macOS or Windows clients. Open the downloaded file in your client and select your PDF folder during setup.
 
 The Python wheel works on macOS 13+, Windows, and glibc Linux 2.28+, on x64 or ARM64. It includes the document processing engine and installs a Node runtime through its Python dependency. With uv:
 
 ```sh
-uv tool install https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks_mcp-0.1.0-py3-none-any.whl
+uv tool install https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.1/pdfbookmarks_mcp-0.1.1-py3-none-any.whl
 pdfbookmarks-mcp --version
 ```
 
@@ -67,7 +67,7 @@ For Python environments, `pip install` also accepts the same wheel URL. Use the 
 ### CLI
 
 ```sh
-npm install -g https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks-mcp-0.1.0.tgz
+npm install -g https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.1/pdfbookmarks-mcp-0.1.1.tgz
 pdfbookmarks-mcp call pdf_inspect --root '/path/to/pdfs' --json '{"path":"book.pdf"}'
 pdfbookmarks-mcp call pdf_render_page --root '/path/to/pdfs' --json '{"path":"book.pdf","page":3}' --image-out 'preview.jpg'
 ```
@@ -84,7 +84,7 @@ Run `pdfbookmarks-mcp tools` for schemas. After installation, use the installed 
 | `pdf_plan_bookmarks` | Resolved destinations, issues, sample and chapter anchors to verify |
 | `pdf_write_bookmarks` | A new PDF, saved after all outline and generated TOC destinations are checked |
 
-Page arguments use 1-based physical pages. Printed numbering can use an offset, verified PDF labels, or explicit physical page numbers for mixed numbering. The tool reads only allowed folders and never overwrites an existing output. PDFs are processed locally. If your agent uses a hosted model, selected text and images returned to the client may be sent to that model. Raw PDF bytes are not sent by this server. Encrypted and digitally signed PDFs require a separate unencrypted or unsigned copy before editing.
+Page arguments use 1-based physical pages. Printed numbering can use an offset, verified PDF labels, or explicit physical page numbers for mixed numbering. Inserting a visible TOC preserves existing embedded page labels. The tool reads only allowed folders and never overwrites an existing output. PDFs are processed locally. If your agent uses a hosted model, selected text and images returned to the client may be sent to that model. Raw PDF bytes are not sent by this server. Encrypted and digitally signed PDFs require a separate unencrypted or unsigned copy before editing.
 
 ## Develop
 

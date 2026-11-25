@@ -40,17 +40,17 @@ function mapPrintedPage(printedPage, pageMapping, labels) {
   return 'PAGE_MAPPING_REQUIRED';
 }
 
-export async function planBookmarks(source, input) {
+export async function planBookmarks(source, input, includeSourceState = false) {
   return withPdf(source.bytes, async (pdf) => {
     const { entries, tocText, pageMapping, outlineMode, insertToc } = input;
     if (outlineMode === 'keep' && !insertToc) throw new PdfError('NO_CHANGES', 'Keeping the outline requires a visible table of contents to insert.');
     if (insertToc && insertToc.beforePage !== pdf.numPages + 1) checkPage(pdf, insertToc.beforePage);
-    const existing = await readOutline(pdf, 1);
+    const existing = await readOutline(pdf, includeSourceState && outlineMode === 'keep' ? 2000 : 1);
     const existingOutline = existing.bookmarks.length > 0;
     const { rows, issues } = entries ? { rows: entries, issues: [] } : parseText(tocText);
     if (outlineMode === 'create' && existingOutline) issues.unshift({ code: 'OUTLINE_EXISTS' });
     if (rows.length === 0) issues.push({ code: 'NO_BOOKMARKS' });
-    const labels = pageMapping?.mode === 'labels' ? await pdf.getPageLabels() : null;
+    const labels = pageMapping?.mode === 'labels' || (includeSourceState && insertToc) ? await pdf.getPageLabels() : null;
     const bookmarks = [];
     let previousDepth = 0;
     for (const [index, row] of rows.entries()) {
@@ -91,6 +91,7 @@ export async function planBookmarks(source, input) {
       issues: issues.slice(0, 30),
       issueCount: issues.length,
       bookmarks,
+      ...(includeSourceState && { sourceState: { labels, outline: existing } }),
     };
   });
 }

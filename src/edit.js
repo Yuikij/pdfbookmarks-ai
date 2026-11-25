@@ -3,6 +3,7 @@ import { PdfError, saveNewFile } from './files.js';
 import { planBookmarks } from './plan.js';
 import { readOutline, resolvePage, withPdf } from './read.js';
 import { writeOutline } from './outline.js';
+import { shiftPageLabels } from './page-labels.js';
 import { insertTocPages } from './toc.js';
 
 function hasDigitalSignature(doc) {
@@ -22,10 +23,14 @@ function hasDigitalSignature(doc) {
   return false;
 }
 
-async function verifyOutput(bytes, plan, toc, input, originalOutline) {
+async function verifyOutput(bytes, plan, toc, input, originalOutline, originalLabels) {
   return withPdf(bytes, async (pdf) => {
     const pageCount = plan.sourcePageCount + toc.tocPageCount;
     if (pdf.numPages !== pageCount) return false;
+    if (originalLabels) {
+      const labels = await pdf.getPageLabels();
+      if (!labels || !originalLabels.every((label, index) => labels[toc.finalPageOf(index + 1) - 1] === label)) return false;
+    }
     const outline = await readOutline(pdf, Math.max(2000, plan.bookmarks.length));
     if (outline.bookmarksTruncated || outline.bookmarks.length !== originalOutline.length) return false;
     const expectedOutline = originalOutline.map(({ title, page, depth }) => ({
@@ -51,7 +56,7 @@ export async function writeBookmarks(files, source, input) {
   if (source.sha256 !== input.sourceSha256) {
     throw new PdfError('SOURCE_CHANGED', 'The file differs from the planned PDF. Inspect it and run a new plan.');
   }
-  const plan = await planBookmarks(source, input);
+  const plan = await planBookmarks(source, input, true);
   if (plan.planId !== input.planId) throw new PdfError('PLAN_CHANGED', 'Plan these exact entries and settings before writing.');
   if (!plan.ready) throw new PdfError('PLAN_HAS_ISSUES', 'Resolve every issue before writing.', { issueCount: plan.issueCount, issues: plan.issues });
   const target = await files.output(input.outputPath);
@@ -59,9 +64,11 @@ export async function writeBookmarks(files, source, input) {
   if (hasDigitalSignature(doc)) throw new PdfError('SIGNED_PDF', 'This PDF has a digital signature. Supply an unsigned copy for editing.');
   const toc = input.insertToc ? await insertTocPages(doc, plan.bookmarks, input.insertToc)
     : { tocPageCount: 0, targetPages: [], finalPageOf: (page) => page };
+  const originalLabels = toc.tocPageCount ? plan.sourceState.labels : null;
+  if (originalLabels) shiftPageLabels(doc, input.insertToc.beforePage, toc.tocPageCount, originalLabels);
   let originalOutline;
   if (input.outlineMode === 'keep') {
-    const existing = await withPdf(source.bytes, readOutline);
+    const existing = plan.sourceState.outline;
     if (existing.bookmarksTruncated) throw new PdfError('OUTLINE_TOO_LARGE', 'The existing outline is too large to verify completely.');
     originalOutline = existing.bookmarks;
   } else {
@@ -70,8 +77,8 @@ export async function writeBookmarks(files, source, input) {
   }
 
   const bytes = await doc.save({ updateFieldAppearances: false });
-  if (!(await verifyOutput(bytes, plan, toc, input, originalOutline))) {
-    throw new PdfError('OUTPUT_VERIFICATION_FAILED', 'The generated PDF failed its outline or link checks. No output was written.');
+  if (!(await verifyOutput(bytes, plan, toc, input, originalOutline, originalLabels))) {
+    throw new PdfError('OUTPUT_VERIFICATION_FAILED', 'The generated PDF failed its bookmark, page label, or TOC link checks. No output was written.');
   }
   await saveNewFile(target, bytes);
   return {
