@@ -53,7 +53,7 @@ test('real stdio client renders a scan, plans Chinese outline and verifies a lin
   assert.equal(tools.find(({ name }) => name === 'pdf_write_bookmarks').annotations.destructiveHint, false);
 
   const inspection = await call('pdf_inspect', { path: 'source.pdf' });
-  assert.equal(inspection.structuredContent.pageCount, 5);
+  assert.equal(inspection.structuredContent.pageCount, 5, JSON.stringify(inspection.structuredContent));
   assert.deepEqual(inspection.structuredContent.pageLabels.map(({ label }) => label), ['i', 'ii', '1', '2', '3']);
   assert.equal(inspection.structuredContent.sourceSha256, sha(source));
   const text = await call('pdf_read_pages', { path: 'source.pdf', pages: [1, 3] });
@@ -126,5 +126,6 @@ test('default server requires workspace roots and accepts a client-provided root
   const args = { name: 'pdf_inspect', arguments: { path: 'example.pdf' } };
   assert.equal((await client.callTool(args)).structuredContent.error.code, 'ROOT_REQUIRED');
   roots = [{ uri: pathToFileURL(root).href }];
-  assert.equal((await client.callTool(args)).structuredContent.pageCount, 5);
+  const inspected = (await client.callTool(args)).structuredContent;
+  assert.equal(inspected.pageCount, 5, JSON.stringify(inspected));
 });

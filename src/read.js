@@ -9,14 +9,15 @@ const maxResultNodes = 2000;
 export async function withPdf(bytes, fn) {
   pdfjsPromise ??= import('pdfjs-dist/legacy/build/pdf.mjs');
   const pdfjs = await pdfjsPromise;
-  const root = path.dirname(require.resolve('pdfjs-dist/package.json'));
+  const root = path.dirname(require.resolve('pdfjs-dist/package.json')).split(path.sep).join('/');
   const loading = pdfjs.getDocument({
     data: Uint8Array.from(bytes),
     verbosity: pdfjs.VerbosityLevel.ERRORS,
-    cMapUrl: path.join(root, 'cmaps') + path.sep,
+    cMapUrl: `${root}/cmaps/`,
     cMapPacked: true,
-    standardFontDataUrl: path.join(root, 'standard_fonts') + path.sep,
-    wasmUrl: path.join(root, 'wasm') + path.sep,
+    standardFontDataUrl: `${root}/standard_fonts/`,
+    wasmUrl: `${root}/wasm/`,
+    iccUrl: `${root}/iccs/`,
     useWorkerFetch: false,
     isEvalSupported: false,
     enableXfa: false,

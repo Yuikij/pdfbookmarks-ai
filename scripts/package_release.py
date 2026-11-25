@@ -1,5 +1,6 @@
 """Build a GitHub npm archive, MCPB and Python wheel from one locked engine."""
 
+import base64
 import concurrent.futures
 import hashlib
 import json
@@ -19,7 +20,7 @@ VERSION = PACKAGE["version"]
 GITHUB = "https://github.com/Yuikij/pdfbookmarks-ai"
 NATIVE_PLATFORMS = (
     "darwin-arm64", "darwin-x64", "win32-arm64-msvc", "win32-x64-msvc",
-    "linux-arm64-gnu", "linux-arm64-musl", "linux-x64-gnu", "linux-x64-musl",
+    "linux-arm64-gnu", "linux-x64-gnu",
 )
 
 
@@ -35,7 +36,6 @@ def add_canvas_package(platform, engine, workspace):
     run("npm", "pack", "--ignore-scripts", dependency["resolved"], cwd=local)
     (archive,) = local.glob("*.tgz")
     algorithm, checksum = dependency["integrity"].split("-", 1)
-    import base64
     with archive.open("rb") as stream:
         digest = base64.b64encode(hashlib.file_digest(stream, algorithm).digest()).decode()
     if digest != checksum:
@@ -43,6 +43,15 @@ def add_canvas_package(platform, engine, workspace):
     with tarfile.open(archive) as source:
         source.extractall(local, filter="data")
     (local / "package").rename(engine / "node_modules" / package)
+
+
+def prune_unused_pdfjs_assets(engine):
+    pdfjs = engine / "node_modules" / "pdfjs-dist"
+    for name in ("build", "image_decoders", "types", "web", "legacy/image_decoders", "legacy/web"):
+        shutil.rmtree(pdfjs / name)
+    for file in (pdfjs / "legacy" / "build").iterdir():
+        if file.name not in ("pdf.mjs", "pdf.worker.mjs"):
+            file.unlink()
 
 
 def main():
@@ -64,6 +73,7 @@ def main():
             for _ in executor.map(lambda platform: add_canvas_package(platform, engine, workspace), NATIVE_PLATFORMS):
                 pass
 
+        prune_unused_pdfjs_assets(engine)
         shutil.rmtree(engine / "node_modules" / ".bin", ignore_errors=True)
         (engine / "node_modules" / ".package-lock.json").unlink(missing_ok=True)
         shutil.copy2(ROOT / "packaging" / "manifest.json", engine / "manifest.json")
@@ -73,8 +83,9 @@ def main():
         bundle = DIST / f"pdfbookmarks-{VERSION}.mcpb"
         with zipfile.ZipFile(bundle, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for file in sorted(engine.rglob("*")):
-                if file.is_file():
-                    archive.write(file, file.relative_to(engine))
+                relative = file.relative_to(engine)
+                if file.is_file() and not str(relative).startswith("node_modules/@napi-rs/canvas-linux-"):
+                    archive.write(file, relative)
 
         for name in ("README.md", "LICENSE"):
             shutil.copy2(ROOT / name, python_root / name)

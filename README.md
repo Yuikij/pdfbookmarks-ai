@@ -49,11 +49,20 @@ Requires Node.js 22.13+. Install the published GitHub Release archive with npm o
 }
 ```
 
-Replace the folder with one you want to share with the MCP. Repeat `--root` to grant another folder. Without `--root`, the server uses active MCP workspace roots if the client exposes them. On Windows, use a fully qualified folder path with escaped backslashes in JSON. If your client uses `servers` or a dedicated UI, enter the same `command` and `args` there.
+Replace the folder with one you want to share with the MCP. Repeat `--root` to grant another folder. Without `--root`, the server uses active MCP workspace roots if the client exposes them. On Windows, use a fully qualified folder path with escaped backslashes in JSON. If your client cannot launch `npx` directly, install the npm archive and use the included desktop bundle or configure the absolute path to Node and the installed `src/cli.js`. If your client uses `servers` or a dedicated UI, enter the same `command` and `args` there.
 
 ### Desktop bundle and Python
 
-The [GitHub Release](https://github.com/Yuikij/pdfbookmarks-ai/releases/latest) also includes a local `.mcpb` bundle for compatible desktop clients and a Python wheel. The bundle uses the desktop client's Node runtime. The wheel uses the same engine and brings in Node through its declared Python dependency. Both include the document processing dependencies. See the release for supported platforms and install commands.
+Download the [desktop MCPB](https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks-0.1.0.mcpb) for compatible macOS or Windows clients. Open the downloaded file in your client and select your PDF folder during setup.
+
+The Python wheel works on macOS 13+, Windows, and glibc Linux 2.28+, on x64 or ARM64. It includes the document processing engine and installs a Node runtime through its Python dependency. With uv:
+
+```sh
+uv tool install https://github.com/Yuikij/pdfbookmarks-ai/releases/download/v0.1.0/pdfbookmarks_mcp-0.1.0-py3-none-any.whl
+pdfbookmarks-mcp --version
+```
+
+For Python environments, `pip install` also accepts the same wheel URL. Use the npm release on Alpine Linux.
 
 ### CLI
 

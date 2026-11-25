@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 license-files = ["LICENSE"]
-dependencies = ["nodejs-wheel==24.22.1"]
+dependencies = ["nodejs-wheel==24.19.0"]
 
 [project.urls]
 Homepage = "https://pdfbookmarks.com/ai-tools"
