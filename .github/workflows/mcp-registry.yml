@@ -1,0 +1,31 @@
+name: Publish MCP registry entry
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, for example v0.1.0
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the release manifest and MCP bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern 'server.json' --pattern '*.mcpb'
+          sha=$(jq -er '.packages[] | select(.registryType=="mcpb") | .fileSha256' server.json)
+          printf '%s  pdfbookmarks-%s.mcpb\n' "$sha" "${RELEASE_TAG#v}" | sha256sum --check
+      - name: Publish verified metadata
+        run: |
+          curl -fsSLo publisher.tgz https://github.com/modelcontextprotocol/registry/releases/download/v1.8.16/mcp-publisher_linux_amd64.tar.gz
+          tar -xzf publisher.tgz mcp-publisher
+          ./mcp-publisher validate
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

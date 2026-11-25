@@ -1,0 +1,7 @@
+# Reading a scanned or irregular table of contents
+
+- Render the likely TOC pages first. Read headings, indentation, columns and page numbers from the images. If text is small, call `pdf_render_page` again with a normalized crop (`left`, `top`, `width`, `height`, all relative to the displayed page) and a longer edge of 2000–2400 pixels. For two columns inspect each separately to preserve reading order.
+- Transcribe the title and printed page first. Combine wrapped titles that lack their own destination with the adjacent row. Use depth 1 for the first level, 2 for subdivisions and so on. Avoid taking dot leaders and chapter running headers as titles.
+- Confirm the physical page of an early chapter and a later chapter. A printed page 1 on physical PDF page 13 means `{"mode":"offset","offset":12}`. Use two widely separated anchors to detect missing or repeated pages. Embedded labels from `pdf_inspect` can differ from printing. Use `{"mode":"labels"}` only after matching visible labels to the document.
+- If front matter uses Roman numerals or offsets change across sections, specify the actual physical `page` for affected entries. For a fully scanned chapter opening, render the candidate page and match the heading. Where an intended destination is illegible or absent, ask for that entry or obtain approval to omit it.
+- Generated visible TOC numbers count physical pages in the resulting file. Inserting pages shifts targets at or after the insertion point. The local writer validates this calculation and every generated link.

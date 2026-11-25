@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pdfbookmarks-mcp"
+version = "0.1.0"
+description = "Local PDF bookmarks and clickable tables of contents for AI agents."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["nodejs-wheel==24.22.1"]
+
+[project.urls]
+Homepage = "https://pdfbookmarks.com/ai-tools"
+Repository = "https://github.com/Yuikij/pdfbookmarks-ai"
+
+[project.scripts]
+pdfbookmarks-mcp = "pdfbookmarks_mcp:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pdfbookmarks_mcp"]

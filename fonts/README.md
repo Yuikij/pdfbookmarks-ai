@@ -1,0 +1,1 @@
+DroidSansFallbackFull.ttf comes from [Android Open Source Project, tag android-4.4.4_r2](https://android.googlesource.com/platform/frameworks/base/+/android-4.4.4_r2/data/fonts/DroidSansFallbackFull.ttf). It is distributed under [Apache License 2.0](Apache-2.0.txt) with the upstream [notice](Droid-NOTICE.txt). PDFBookmarks subsets the font into generated TOC pages that need it.
